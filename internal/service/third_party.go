@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/ZhangPengPaul/LightOTA/internal/model"
 )
@@ -19,7 +20,9 @@ func NewThirdPartyClient(baseURL, apiKey string) *ThirdPartyClient {
 	return &ThirdPartyClient{
 		baseURL:    baseURL,
 		apiKey:     apiKey,
-		httpClient: &http.Client{},
+		httpClient: &http.Client{
+			Timeout: 30 * time.Second,
+		},
 	}
 }
 

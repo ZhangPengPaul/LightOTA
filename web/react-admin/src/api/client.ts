@@ -13,61 +13,61 @@ export function setApiKey(apiKey: string) {
 export interface Tenant {
   id: string;
   name: string;
-  apiKey: string;
-  externalDeviceAPIUrl: string;
-  createdAt: string;
-  updatedAt: string;
+  api_key: string;
+  external_device_api_url: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Product {
   id: string;
-  tenantId: string;
+  tenant_id: string;
   name: string;
   description: string;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Firmware {
   id: string;
-  tenantId: string;
-  productId: string;
+  tenant_id: string;
+  product_id: string;
   version: string;
-  versionCode: number;
+  version_code: number;
   changelog: string;
-  fileSize: number;
+  file_size: number;
   md5: string;
-  releaseNotes: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  release_notes: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface UpgradeTask {
   id: string;
-  tenantId: string;
-  productId: string;
-  firmwareId: string;
-  taskName: string;
-  upgradeType: 'specified' | 'all' | 'gray';
-  grayPercent: number;
-  targetDevicesCount: number;
-  pushRate: number;
+  tenant_id: string;
+  product_id: string;
+  firmware_id: string;
+  task_name: string;
+  upgrade_type: 'specified' | 'all' | 'gray';
+  gray_percent: number;
+  target_devices_count: number;
+  push_rate: number;
   status: 'created' | 'running' | 'paused' | 'completed' | 'cancelled';
-  createdBy: string;
-  startedAt: string | null;
-  completedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
+  created_by: string;
+  started_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface TaskStats {
   total: number;
-  successCount: number;
-  failedCount: number;
-  pendingCount: number;
+  success_count: number;
+  failed_count: number;
+  pending_count: number;
   percent: number;
-  statusCounts: Record<string, number>;
+  status_counts: Record<string, number>;
 };
 
 export const apiClient = {
@@ -76,11 +76,11 @@ export const apiClient = {
     const res = await api.get('/tenants');
     return res.data.data;
   },
-  createTenant: async (data: {name: string; externalDeviceApiUrl: string}) => {
+  createTenant: async (data: {name: string; external_device_api_url: string}) => {
     const res = await api.post('/tenants', data);
     return res.data;
   },
-  updateTenant: async (id: string, data: {name?: string; externalDeviceApiUrl?: string}) => {
+  updateTenant: async (id: string, data: {name?: string; external_device_api_url?: string}) => {
     const res = await api.put(`/tenants/${id}`, data);
     return res.data;
   },
@@ -121,13 +121,13 @@ export const apiClient = {
 
   // Upgrade Task
   createUpgradeTask: async (data: {
-    productId: string;
-    firmwareId: string;
-    taskName: string;
-    upgradeType: 'specified' | 'all' | 'gray';
-    grayPercent?: number;
-    targetDeviceIds?: string[];
-    pushRate?: number;
+    product_id: string;
+    firmware_id: string;
+    task_name: string;
+    upgrade_type: 'specified' | 'all' | 'gray';
+    gray_percent?: number;
+    target_device_ids?: string[];
+    push_rate?: number;
   }) => {
     const res = await api.post('/upgrade/task', data);
     return res.data;

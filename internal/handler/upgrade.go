@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/ZhangPengPaul/LightOTA/internal/model"
 	"github.com/ZhangPengPaul/LightOTA/internal/service"
@@ -148,6 +149,8 @@ func (h *UpgradeHandler) processPendingTasks(task *model.UpgradeTask) {
 		if len(records) < task.PushRate {
 			break
 		}
+		
+		time.Sleep(time.Second)
 	}
 
 	stats, err := h.service.GetStats(task.ID)

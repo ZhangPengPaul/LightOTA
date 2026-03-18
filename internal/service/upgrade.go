@@ -116,6 +116,11 @@ func (s *UpgradeService) CreateTask(tenantID string, req *CreateUpgradeTaskReque
 		return nil, err
 	}
 
+	firmware, err := s.repo.FindFirmwareByID(tenantID, req.FirmwareID)
+	if err != nil {
+		return nil, err
+	}
+
 	for _, dev := range devices {
 		device, err := s.repo.FindDeviceByExternalID(tenantID, dev.DeviceID)
 		if err != nil {
@@ -138,7 +143,7 @@ func (s *UpgradeService) CreateTask(tenantID string, req *CreateUpgradeTaskReque
 			TaskID:     task.ID,
 			DeviceID:   device.ID,
 			OldVersion: device.CurrentVersion,
-			NewVersion: "",
+			NewVersion: firmware.Version,
 			Status:     model.DeviceStatusPending,
 		}
 		s.repo.CreateDeviceUpgradeRecord(record)

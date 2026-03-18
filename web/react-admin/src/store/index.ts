@@ -6,8 +6,8 @@ interface AppState {
   // Tenants
   tenants: Tenant[];
   fetchTenants: () => Promise<void>;
-  createTenant: (data: {name: string; externalDeviceApiUrl: string}) => Promise<void>;
-  updateTenant: (id: string, data: {name?: string; externalDeviceApiUrl?: string}) => Promise<void>;
+  createTenant: (data: {name: string; external_device_api_url: string}) => Promise<void>;
+  updateTenant: (id: string, data: {name?: string; external_device_api_url?: string}) => Promise<void>;
 
   // Products
   products: Product[];
@@ -20,22 +20,22 @@ interface AppState {
 
   // Firmwares
   firmwares: Firmware[];
-  fetchFirmwares: (productId: string) => Promise<void>;
-  createFirmware: (formData: FormData, productId: string) => Promise<void>;
+  fetchFirmwares: (product_id: string) => Promise<void>;
+  createFirmware: (formData: FormData, product_id: string) => Promise<void>;
   deleteFirmware: (id: string) => Promise<void>;
 
   // Upgrade Tasks
   upgradeTasks: UpgradeTask[];
   currentTask: (UpgradeTask & TaskStats) | null;
-  fetchUpgradeTasks: (productId?: string) => Promise<void>;
+  fetchUpgradeTasks: (product_id?: string) => Promise<void>;
   createUpgradeTask: (data: {
-    productId: string;
-    firmwareId: string;
-    taskName: string;
-    upgradeType: 'specified' | 'all' | 'gray';
-    grayPercent?: number;
-    targetDeviceIds?: string[];
-    pushRate?: number;
+    product_id: string;
+    firmware_id: string;
+    task_name: string;
+    upgrade_type: 'specified' | 'all' | 'gray';
+    gray_percent?: number;
+    target_device_ids?: string[];
+    push_rate?: number;
   }) => Promise<{taskId: string}>;
   fetchUpgradeTask: (id: string) => Promise<void>;
   setCurrentTask: (task: (UpgradeTask & TaskStats) | null) => void;
@@ -103,7 +103,7 @@ export const useStore = create<AppState>((set, get) => ({
   },
   createUpgradeTask: async (data) => {
     const res = await apiClient.createUpgradeTask(data);
-    await get().fetchUpgradeTasks(data.productId);
+    await get().fetchUpgradeTasks(data.product_id);
     return res.data;
   },
   fetchUpgradeTask: async (id) => {

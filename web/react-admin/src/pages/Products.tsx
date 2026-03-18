@@ -53,8 +53,8 @@ export default function Products() {
     },
     {
       title: 'Created At',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      dataIndex: 'created_at',
+      key: 'created_at',
       width: 180,
     },
     {

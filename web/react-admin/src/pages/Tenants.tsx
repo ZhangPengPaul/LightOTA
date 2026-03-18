@@ -42,18 +42,18 @@ export default function Tenants() {
     },
     {
       title: 'API Key',
-      dataIndex: 'apiKey',
-      key: 'apiKey',
+      dataIndex: 'api_key',
+      key: 'api_key',
     },
     {
       title: 'External API URL',
-      dataIndex: 'externalDeviceAPIUrl',
-      key: 'externalDeviceAPIUrl',
+      dataIndex: 'external_device_api_url',
+      key: 'external_device_api_url',
     },
     {
       title: 'Created At',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      dataIndex: 'created_at',
+      key: 'created_at',
       width: 180,
     },
     {
@@ -96,7 +96,7 @@ export default function Tenants() {
             <input placeholder="Tenant name" />
           </Form.Item>
           <Form.Item
-            name="externalDeviceApiUrl"
+            name="external_device_api_url"
             label="External Device API URL"
           >
             <input placeholder="https://your-device-api.com/api" />

@@ -23,8 +23,10 @@ export default function UpgradeTasks() {
     createUpgradeTask,
     fetchProducts,
     fetchFirmwares,
+    setCurrentTask,
   } = useStore();
-  const [modalVisible, setModalVisible] = useState(false);
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -38,38 +40,58 @@ export default function UpgradeTasks() {
     }
   };
 
-  const handleOpenModal = () => {
+  const handleOpenCreateModal = () => {
     form.resetFields();
-    setModalVisible(true);
+    setCreateModalVisible(true);
   };
 
   const handleSubmit = async () => {
     const values = await form.validateFields();
-    await createUpgradeTask(values);
+    const mappedValues = {
+      product_id: values.productId,
+      firmware_id: values.firmwareId,
+      task_name: values.taskName,
+      upgrade_type: values.upgradeType,
+      gray_percent: values.grayPercent,
+      push_rate: values.pushRate,
+    };
+    await createUpgradeTask(mappedValues);
     message.success('Upgrade task created');
-    setModalVisible(false);
+    setCreateModalVisible(false);
     form.resetFields();
   };
 
-  const handleRowClick = (record: UpgradeTask) => {
-    fetchUpgradeTask(record.id);
+  const handleRowClick = async (record: UpgradeTask) => {
+    await fetchUpgradeTask(record.id);
+    setDetailModalVisible(true);
+  };
+
+  const handleCloseDetail = () => {
+    setDetailModalVisible(false);
+    setCurrentTask(null);
   };
 
   const columns = [
     {
       title: 'Name',
-      dataIndex: 'taskName',
-      key: 'taskName',
+      dataIndex: 'task_name',
+      key: 'task_name',
+      width: 150,
     },
     {
       title: 'Product',
-      dataIndex: 'productId',
-      key: 'productId',
+      dataIndex: 'product_id',
+      key: 'product_id',
+      width: 200,
+      render: (productId: string) => {
+        const product = products.find(p => p.id === productId);
+        return product?.name || productId;
+      },
     },
     {
       title: 'Type',
-      dataIndex: 'upgradeType',
-      key: 'upgradeType',
+      dataIndex: 'upgrade_type',
+      key: 'upgrade_type',
       width: 100,
     },
     {
@@ -81,73 +103,44 @@ export default function UpgradeTasks() {
     },
     {
       title: 'Devices',
-      dataIndex: 'targetDevicesCount',
-      key: 'targetDevicesCount',
+      dataIndex: 'target_devices_count',
+      key: 'target_devices_count',
       width: 100,
     },
     {
       title: 'Created At',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      width: 180,
+      dataIndex: 'created_at',
+      key: 'created_at',
+      width: 220,
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      width: 100,
+      render: (_: any, record: UpgradeTask) => (
+        <Button type="link" size="small" onClick={() => handleRowClick(record)}>
+          View
+        </Button>
+      ),
     },
   ];
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '16px' }}>
-      <Card title="Upgrade Tasks" extra={<Button type="primary" icon={<PlusOutlined />} onClick={handleOpenModal}>New Task</Button>}>
+    <div>
+      <Card title="Upgrade Tasks" extra={<Button type="primary" icon={<PlusOutlined />} onClick={handleOpenCreateModal}>New Task</Button>}>
         <Table
           columns={columns}
           dataSource={upgradeTasks}
           rowKey="id"
-          onRow={(record) => ({
-            onClick: () => handleRowClick(record),
-          })}
           pagination={{ pageSize: 10 }}
         />
       </Card>
 
-      {currentTask && (
-        <Card title={`Task: ${currentTask.taskName}`}>
-          <Space direction="vertical" size="large" style={{ width: '100%' }}>
-            <div>
-              <div style={{ marginBottom: 8 }}>
-                <strong>Status:</strong>{' '}
-                <Tag color={statusColors[currentTask.status]}>{currentTask.status}</Tag>
-              </div>
-              <div><strong>Type:</strong> {currentTask.upgradeType}</div>
-              <div><strong>Target Devices:</strong> {currentTask.targetDevicesCount}</div>
-              <div><strong>Firmware:</strong> {currentTask.firmwareId}</div>
-            </div>
-
-            {currentTask.percent !== undefined && (
-              <div>
-                <div style={{ marginBottom: 8 }}>
-                  <strong>Progress: {currentTask.percent}%</strong>
-                </div>
-                <Progress percent={currentTask.percent} status="active" />
-              </div>
-            )}
-
-            {currentTask.successCount !== undefined && (
-              <div>
-                <div><strong>Success: {currentTask.successCount}</strong></div>
-                <div><strong>Failed: {currentTask.failedCount}</strong></div>
-                <div><strong>Pending: {currentTask.pendingCount}</strong></div>
-              </div>
-            )}
-
-            {currentTask.startedAt && <div><strong>Started:</strong> {currentTask.startedAt}</div>}
-            {currentTask.completedAt && <div><strong>Completed:</strong> {currentTask.completedAt}</div>}
-          </Space>
-        </Card>
-      )}
-
       <Modal
         title="Create Upgrade Task"
-        open={modalVisible}
+        open={createModalVisible}
         onOk={handleSubmit}
-        onCancel={() => setModalVisible(false)}
+        onCancel={() => setCreateModalVisible(false)}
         width={500}
       >
         <Form form={form} layout="vertical">
@@ -173,7 +166,7 @@ export default function UpgradeTasks() {
             <Select placeholder="Select firmware">
               {firmwares.map((f) => (
                 <Select.Option key={f.id} value={f.id}>
-                  {f.version} (code: {f.versionCode})
+                  {f.version} (code: {f.version_code})
                 </Select.Option>
               ))}
             </Select>
@@ -226,6 +219,48 @@ export default function UpgradeTasks() {
             <Input type="number" min={1} max={1000} />
           </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal
+        title={currentTask?.task_name}
+        open={detailModalVisible}
+        onCancel={handleCloseDetail}
+        footer={null}
+        width={500}
+      >
+        {currentTask && (
+          <Space direction="vertical" size="large" style={{ width: '100%', wordBreak: 'break-word' }}>
+            <div>
+              <div style={{ marginBottom: 8 }}>
+                <strong>Status:</strong>{' '}
+                <Tag color={statusColors[currentTask.status]}>{currentTask.status}</Tag>
+              </div>
+              <div><strong>Type:</strong> {currentTask.upgrade_type}</div>
+              <div><strong>Target Devices:</strong> {currentTask.target_devices_count}</div>
+              <div><strong>Firmware:</strong> {currentTask.firmware_id}</div>
+            </div>
+
+            {currentTask.percent !== undefined && (
+              <div>
+                <div style={{ marginBottom: 8 }}>
+                  <strong>Progress: {currentTask.percent}%</strong>
+                </div>
+                <Progress percent={currentTask.percent} status="active" />
+              </div>
+            )}
+
+            {currentTask.success_count !== undefined && (
+              <div>
+                <div><strong>Success: {currentTask.success_count}</strong></div>
+                <div><strong>Failed: {currentTask.failed_count}</strong></div>
+                <div><strong>Pending: {currentTask.pending_count}</strong></div>
+              </div>
+            )}
+
+            {currentTask.started_at && <div><strong>Started:</strong> {currentTask.started_at}</div>}
+            {currentTask.completed_at && <div><strong>Completed:</strong> {currentTask.completed_at}</div>}
+          </Space>
+        )}
       </Modal>
     </div>
   );
