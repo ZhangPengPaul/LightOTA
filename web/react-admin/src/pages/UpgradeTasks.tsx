@@ -47,12 +47,20 @@ export default function UpgradeTasks() {
 
   const handleSubmit = async () => {
     const values = await form.validateFields();
+    let target_device_ids: string[] | undefined = undefined;
+    if (values.upgradeType === 'specified' && values.targetDeviceIds) {
+      target_device_ids = values.targetDeviceIds
+        .split('\n')
+        .map((id: string) => id.trim())
+        .filter((id: string) => id.length > 0);
+    }
     const mappedValues = {
       product_id: values.productId,
       firmware_id: values.firmwareId,
       task_name: values.taskName,
       upgrade_type: values.upgradeType,
       gray_percent: values.grayPercent,
+      target_device_ids: target_device_ids,
       push_rate: values.pushRate,
     };
     await createUpgradeTask(mappedValues);
@@ -206,6 +214,26 @@ export default function UpgradeTasks() {
                   initialValue={10}
                 >
                   <Input type="number" min={1} max={100} />
+                </Form.Item>
+              )
+            }
+          </Form.Item>
+
+          <Form.Item
+            noStyle
+            shouldUpdate={(prev, curr) => prev.upgradeType !== curr.upgradeType}
+          >
+            {({ getFieldValue }) =>
+              getFieldValue('upgradeType') === 'specified' && (
+                <Form.Item
+                  name="targetDeviceIds"
+                  label="Target Device IDs"
+                  rules={[{ required: true, message: 'Please enter target device IDs' }]}
+                >
+                  <Input.TextArea 
+                    placeholder="One device ID per line" 
+                    rows={6}
+                  />
                 </Form.Item>
               )
             }

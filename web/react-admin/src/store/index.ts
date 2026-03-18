@@ -79,8 +79,8 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   firmwares: [],
-  fetchFirmwares: async (productId) => {
-    const res = await apiClient.listFirmwares(productId);
+  fetchFirmwares: async (product_id) => {
+    const res = await apiClient.listFirmwares(product_id);
     set({ firmwares: res.list });
   },
   createFirmware: async (formData, productId) => {

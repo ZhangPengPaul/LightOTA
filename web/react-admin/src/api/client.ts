@@ -104,8 +104,8 @@ export const apiClient = {
   },
 
   // Firmware
-  listFirmwares: async (productId: string, params?: {limit?: number; offset?: number}): Promise<{list: Firmware[]; total: number}> => {
-    const res = await api.get('/firmwares', {params: {productId, ...params}});
+  listFirmwares: async (product_id: string, params?: {limit?: number; offset?: number}): Promise<{list: Firmware[]; total: number}> => {
+    const res = await api.get('/firmwares', {params: {product_id, ...params}});
     return res.data.data;
   },
   createFirmware: async (formData: FormData) => {

@@ -5,15 +5,16 @@ import { useStore } from '../store';
 import type { UploadProps } from 'antd';
 
 export default function Firmwares() {
-  const { firmwares, currentProduct, fetchFirmwares, createFirmware, deleteFirmware } = useStore();
+  const { firmwares, currentProduct, products, fetchProducts, setCurrentProduct, fetchFirmwares, createFirmware, deleteFirmware } = useStore();
   const [modalVisible, setModalVisible] = useState(false);
   const [form] = Form.useForm();
 
   useEffect(() => {
+    fetchProducts();
     if (currentProduct?.id) {
       fetchFirmwares(currentProduct.id);
     }
-  }, [currentProduct?.id, fetchFirmwares]);
+  }, [currentProduct?.id, fetchFirmwares, fetchProducts]);
 
   const handleOpenModal = () => {
     form.resetFields();
@@ -34,11 +35,11 @@ export default function Firmwares() {
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('productId', currentProduct.id);
+    formData.append('product_id', currentProduct.id);
     formData.append('version', values.version);
     formData.append('versionCode', values.versionCode);
     formData.append('changelog', values.changelog || '');
-    formData.append('releaseNotes', values.releaseNotes || '');
+    formData.append('release_notes', values.releaseNotes || '');
 
     await createFirmware(formData, currentProduct.id);
     setModalVisible(false);
@@ -112,31 +113,45 @@ export default function Firmwares() {
     },
   ];
 
-  if (!currentProduct) {
-    return (
-      <Card>
-        <div style={{ textAlign: 'center', padding: '50px', color: '#999' }}>
-          Please select a product from the products page first
-        </div>
-      </Card>
-    );
-  }
-
   return (
     <Card
-      title={`Firmwares - ${currentProduct.name}`}
+      title={currentProduct ? `Firmwares - ${currentProduct.name}` : 'Firmwares'}
       extra={
         <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenModal}>
           Upload Firmware
         </Button>
       }
     >
-      <Table
-        columns={columns}
-        dataSource={firmwares}
-        rowKey="id"
-        pagination={{ pageSize: 10 }}
-      />
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ marginRight: 8 }}>Select Product:</label>
+        <select 
+          value={currentProduct?.id || ''} 
+          onChange={(e) => {
+            const product = products.find(p => p.id === e.target.value);
+            setCurrentProduct(product || null);
+          }}
+          style={{ padding: 4, minWidth: 200 }}
+        >
+          <option value="">- Please select product -</option>
+          {products.map(product => (
+            <option key={product.id} value={product.id}>
+              {product.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      {!currentProduct ? (
+        <div style={{ textAlign: 'center', padding: '30px', color: '#999' }}>
+          Please select a product from the dropdown above
+        </div>
+      ) : (
+        <Table
+          columns={columns}
+          dataSource={firmwares}
+          rowKey="id"
+          pagination={{ pageSize: 10 }}
+        />
+      )}
       <Modal
         title="Upload New Firmware"
         open={modalVisible}

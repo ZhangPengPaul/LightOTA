@@ -28,7 +28,7 @@ type CreateFirmwareRequest struct {
 	Version       string `form:"version" json:"version" binding:"required"`
 	VersionCode   int    `form:"versionCode" json:"version_code" binding:"required"`
 	Changelog     string `form:"changelog" json:"changelog"`
-	ReleaseNotes  string `form:"releaseNotes" json:"release_notes"`
+	ReleaseNotes  string `form:"release_notes" json:"release_notes"`
 }
 
 func (s *FirmwareService) Create(tenantID string, req *CreateFirmwareRequest, fileContent io.Reader, filename string) (*model.Firmware, error) {
