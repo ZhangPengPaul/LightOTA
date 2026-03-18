@@ -3,12 +3,23 @@ import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
+import Login from './pages/Login.tsx'
 import Tenants from './pages/Tenants.tsx'
 import Products from './pages/Products.tsx'
 import Firmwares from './pages/Firmwares.tsx'
 import UpgradeTasks from './pages/UpgradeTasks.tsx'
+import { setApiKey } from './api/client'
+
+const savedApiKey = localStorage.getItem('api_key')
+if (savedApiKey) {
+  setApiKey(savedApiKey)
+}
 
 const router = createBrowserRouter([
+  {
+    path: '/login',
+    element: <Login />,
+  },
   {
     path: '/',
     element: <App />,

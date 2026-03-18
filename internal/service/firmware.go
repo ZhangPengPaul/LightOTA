@@ -24,11 +24,11 @@ func NewFirmwareService(repo *repository.Repository, storagePath string) *Firmwa
 }
 
 type CreateFirmwareRequest struct {
-	ProductID     string `json:"product_id" binding:"required"`
-	Version       string `json:"version" binding:"required"`
-	VersionCode   int    `json:"version_code" binding:"required"`
-	Changelog     string `json:"changelog"`
-	ReleaseNotes  string `json:"release_notes"`
+	ProductID     string `form:"product_id" json:"product_id" binding:"required"`
+	Version       string `form:"version" json:"version" binding:"required"`
+	VersionCode   int    `form:"versionCode" json:"version_code" binding:"required"`
+	Changelog     string `form:"changelog" json:"changelog"`
+	ReleaseNotes  string `form:"releaseNotes" json:"release_notes"`
 }
 
 func (s *FirmwareService) Create(tenantID string, req *CreateFirmwareRequest, fileContent io.Reader, filename string) (*model.Firmware, error) {

@@ -59,7 +59,7 @@ func (h *DeviceHandler) checkUpdate(c *gin.Context) {
 	if c.Request.TLS != nil {
 		scheme = "https"
 	}
-	downloadURL := scheme + "://" + c.Request.Host + "/api/v1/ota/download/" + firmware.ID
+	downloadURL := scheme + "://" + c.Request.Host + "/api/v1/ota/download/" + firmware.ID + "?deviceId=" + req.DeviceID
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
@@ -76,12 +76,19 @@ func (h *DeviceHandler) checkUpdate(c *gin.Context) {
 
 func (h *DeviceHandler) download(c *gin.Context) {
 	firmwareID := c.Param("firmwareId")
-	recordID := c.Query("recordId")
-	_ = recordID
-	var tenantID string
-	// For simplicity in MVP, tenantID can be empty - firmware id is unique anyway
+	deviceID := c.Query("deviceId")
+	if deviceID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "deviceId is required"})
+		return
+	}
 
-	file, size, err := h.service.GetFirmwareFile(tenantID, firmwareID)
+	device, err := h.service.GetDeviceByID(deviceID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "Device not found"})
+		return
+	}
+
+	file, size, err := h.service.GetFirmwareFile(device.TenantID, firmwareID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "Firmware not found"})
 		return

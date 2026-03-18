@@ -198,6 +198,15 @@ func (r *Repository) CreateDevice(device *model.Device) error {
 	return r.db.Create(device).Error
 }
 
+func (r *Repository) FindDeviceByExternalID(tenantID, externalID string) (*model.Device, error) {
+	var device model.Device
+	err := r.db.Where("tenant_id = ? AND external_device_id = ?", tenantID, externalID).First(&device).Error
+	if err != nil {
+		return nil, err
+	}
+	return &device, nil
+}
+
 func (r *Repository) UpdateDeviceCurrentVersion(id string, version string) error {
 	return r.db.Model(&model.Device{}).Where("id = ?", id).Update("current_version", version).Error
 }

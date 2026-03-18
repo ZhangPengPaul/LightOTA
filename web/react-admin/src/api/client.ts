@@ -4,6 +4,12 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1',
 });
 
+export function setApiKey(apiKey: string) {
+  if (apiKey) {
+    api.defaults.headers.common.Authorization = `Bearer ${apiKey}`;
+  }
+}
+
 export interface Tenant {
   id: string;
   name: string;
@@ -62,7 +68,7 @@ export interface TaskStats {
   pendingCount: number;
   percent: number;
   statusCounts: Record<string, number>;
-}
+};
 
 export const apiClient = {
   // Tenant

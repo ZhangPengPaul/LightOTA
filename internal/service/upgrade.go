@@ -19,6 +19,7 @@ type UpgradeService struct {
 	mqttClient   *mqtt.Client
 	httpSSE      *httpsse.Manager
 	cfg          *config.Config
+	rng          *rand.Rand
 }
 
 func NewUpgradeService(
@@ -29,11 +30,13 @@ func NewUpgradeService(
 	mqttClient *mqtt.Client,
 	cfg *config.Config,
 ) *UpgradeService {
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 	return &UpgradeService{
 		repo:         taskRepo,
 		mqttClient:   mqttClient,
 		httpSSE:      httpsse.NewManager(),
 		cfg:          cfg,
+		rng:          rng,
 	}
 }
 
@@ -114,7 +117,7 @@ func (s *UpgradeService) CreateTask(tenantID string, req *CreateUpgradeTaskReque
 	}
 
 	for _, dev := range devices {
-		device, err := s.repo.FindDeviceByID(dev.DeviceID)
+		device, err := s.repo.FindDeviceByExternalID(tenantID, dev.DeviceID)
 		if err != nil {
 			newDevice := &model.Device{
 				ID:               uuid.New().String(),
@@ -214,8 +217,7 @@ func (s *UpgradeService) SelectRandomDevices(devices []model.ThirdPartyDevice, p
 		targetCount = 1
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	perm := rand.Perm(len(devices))
+	perm := s.rng.Perm(len(devices))
 	result := make([]model.ThirdPartyDevice, 0, targetCount)
 	for i := 0; i < targetCount; i++ {
 		result = append(result, devices[perm[i]])

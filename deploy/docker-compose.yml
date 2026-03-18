@@ -4,17 +4,40 @@ services:
   lightota:
     build:
       context: ..
-      dockerfile: ./deploy/Dockerfile
-    container_name: lightota
+      dockerfile: deploy/Dockerfile
     ports:
       - "8080:8080"
     volumes:
       - ./data:/data
       - ./firmwares:/firmwares
     environment:
-      - SERVER_PORT=8080
-      - DATABASE_TYPE=sqlite
-      - DATABASE_PATH=/data/lightota.db
+      - DB_TYPE=sqlite
+      - DB_PATH=/data/lightota.db
       - FIRMWARE_STORAGE_PATH=/firmwares
-      - MQTT_ENABLE=true
-      - MQTT_BROKER=mosquitto
+      - MQTT_ENABLE=false
+      - SERVER_PORT=8080
+    restart: unless-stopped
+
+  # Optional: Use external Mosquitto MQTT broker
+  # mosquitto:
+  #   image: eclipse-mosquitto:2.0
+  #   ports:
+  #     - "1883:1883"
+  #   volumes:
+  #     - ./mosquitto/config:/mosquitto/config
+  #     - ./mosquitto/data:/mosquitto/data
+  #     - ./mosquitto/log:/mosquitto/log
+  #   restart: unless-stopped
+
+  # Optional: Use PostgreSQL instead of SQLite
+  # postgres:
+  #   image: postgres:15-alpine
+  #   environment:
+  #     POSTGRES_PASSWORD: lightota
+  #     POSTGRES_DB: lightota
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+# volumes:
+#   postgres_data:
