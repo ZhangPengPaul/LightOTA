@@ -1,1 +1,6 @@
 docs/
+.trae/
+lightota
+*.log
+data/
+firmwares/

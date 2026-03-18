@@ -22,6 +22,7 @@ func (h *DeviceHandler) Register(r *gin.RouterGroup) {
 	r.GET("/check-update", h.checkUpdate)
 	r.GET("/download/:firmwareId", h.download)
 	r.POST("/report-result", h.reportResult)
+	r.GET("/events/:deviceId", h.subscribeEvents)
 }
 
 type CheckUpdateRequest struct {
@@ -122,4 +123,9 @@ func (h *DeviceHandler) reportResult(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok"})
+}
+
+func (h *DeviceHandler) subscribeEvents(c *gin.Context) {
+	deviceID := c.Param("deviceId")
+	h.service.HandleSSE(c.Writer, c.Request, deviceID)
 }

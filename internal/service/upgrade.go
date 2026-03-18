@@ -2,10 +2,12 @@ package service
 
 import (
 	"math/rand"
+	"net/http"
 	"os"
 	"time"
 
 	"github.com/ZhangPengPaul/LightOTA/internal/config"
+	"github.com/ZhangPengPaul/LightOTA/internal/httpsse"
 	"github.com/ZhangPengPaul/LightOTA/internal/model"
 	"github.com/ZhangPengPaul/LightOTA/internal/mqtt"
 	"github.com/ZhangPengPaul/LightOTA/internal/repository"
@@ -13,8 +15,9 @@ import (
 )
 
 type UpgradeService struct {
-	repo     *repository.Repository
+	repo         *repository.Repository
 	mqttClient   *mqtt.Client
+	httpSSE      *httpsse.Manager
 	cfg          *config.Config
 }
 
@@ -29,6 +32,7 @@ func NewUpgradeService(
 	return &UpgradeService{
 		repo:         taskRepo,
 		mqttClient:   mqttClient,
+		httpSSE:      httpsse.NewManager(),
 		cfg:          cfg,
 	}
 }
@@ -176,6 +180,10 @@ func (s *UpgradeService) PushNotification(record *model.DeviceUpgradeRecord, fir
 		}
 	}
 
+	if s.httpSSE != nil {
+		s.httpSSE.NotifyUpgrade(device.ExternalDeviceID, firmware)
+	}
+
 	return s.repo.UpdateDeviceUpgradeRecordStatus(record.ID, model.DeviceStatusNotified)
 }
 
@@ -243,4 +251,8 @@ func (s *UpgradeService) GetFirmwareFile(tenantID, id string) (*os.File, int64, 
 
 func (s *UpgradeService) FindPendingByTaskAndDevice(taskID, deviceID string) (*model.DeviceUpgradeRecord, error) {
 	return s.repo.FindDeviceUpgradeRecordByTaskAndDevice(taskID, deviceID)
+}
+
+func (s *UpgradeService) HandleSSE(w http.ResponseWriter, r *http.Request, deviceID string) {
+	s.httpSSE.HandleSSE(w, r, deviceID)
 }
