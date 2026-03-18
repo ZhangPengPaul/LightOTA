@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  lightota:
+    build:
+      context: ..
+      dockerfile: ./deploy/Dockerfile
+    container_name: lightota
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/data
+      - ./firmwares:/firmwares
+    environment:
+      - SERVER_PORT=8080
+      - DATABASE_TYPE=sqlite
+      - DATABASE_PATH=/data/lightota.db
+      - FIRMWARE_STORAGE_PATH=/firmwares
+      - MQTT_ENABLE=true
+      - MQTT_BROKER=mosquitto
